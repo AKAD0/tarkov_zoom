@@ -1,4 +1,9 @@
 @echo off
-call "C:\Users\Mamma\Desktop\tarkov_zoom\venv\Scripts\activate.bat"
-"python.exe" "C:\Users\Mamma\Desktop\tarkov_zoom\script.py"
+REM set current directory
+set DIR=%~dp0
+cd /d %DIR%
+
+
+call .\venv\Scripts\activate.bat
+"python.exe" ".\script.py"
 pause
