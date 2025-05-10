@@ -44,14 +44,16 @@ def set_zoom_level(zoom_level, x, y):
 
 initialize_magnifier()
 zoom_level = 1.0 
-set_zoom_level(zoom_level, 0, 0)
+set_zoom_level(zoom_level, 0, 0) 
 print('Zoom\'s a-go.')
 
 
 while True:
-    if keyboard.is_pressed('shift'):  
-        zoom_level = 2  
-        set_zoom_level(zoom_level, 480, 270)
+    if keyboard.is_pressed('shift'): 
+        zoom_level = 3
+        x = int(960*((16-(16/zoom_level))/16))
+        y = int((x/16)*9)
+        set_zoom_level(zoom_level, x, y)
 
     else:
         if zoom_level != 1.0:  
