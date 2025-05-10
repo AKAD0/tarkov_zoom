@@ -3,7 +3,6 @@ from ctypes import wintypes
 import keyboard
 import time
 
-
 print('Setting gamma...')
 def test_gamma_set(gamma_value):
     gdi32 = ctypes.windll.gdi32
@@ -24,9 +23,35 @@ def test_gamma_set(gamma_value):
     print(f"Gamma successfully set to {gamma_value}.")
     return True
 
+def set_contrast(contrast_value):
+    """
+    Adjust screen contrast by simulating contrast changes using gamma ramp.
+    :param contrast_value: Contrast adjustment factor (1.0 = normal, >1.0 = higher contrast, <1.0 = lower contrast)
+    """
+    # Initialize the gamma ramp
+    ramp = (ctypes.c_ushort * 256 * 3)()
+    for i in range(256):
+        value = max(0, min(255, int((i - 128) * contrast_value + 128)))  # Scale values for contrast
+        value = int(value / 255.0 * 65535)  # Convert to 16-bit range
+        ramp[0][i] = ramp[1][i] = ramp[2][i] = value
+
+    # Get the device context for the screen
+    hdc = ctypes.windll.user32.GetDC(0)
+    if hdc == 0:
+        raise RuntimeError("Failed to get device context.")
+
+    # Apply the gamma ramp
+    if not ctypes.windll.gdi32.SetDeviceGammaRamp(hdc, ctypes.byref(ramp)):
+        raise RuntimeError("Failed to set gamma ramp.")
+    ctypes.windll.user32.ReleaseDC(0, hdc)
+
+    print(f"Contrast set to: {contrast_value}")
+
+
 gamma = int(3)
 if not test_gamma_set(gamma):
     print("Gamma adjustment test failed.")
+set_contrast(1.5)
 
 
 print('Launching zoom...')
@@ -48,7 +73,7 @@ zoom_level = 1.0
 set_zoom_level(zoom_level, 0, 0) 
 print('Zoom\'s a-go.')
 press_start_time = None
-pause = 0.2
+pause = 0.1
 
 while True:
     if keyboard.is_pressed('shift'): 
