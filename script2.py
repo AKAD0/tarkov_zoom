@@ -32,8 +32,8 @@ def test_gamma_contrast_set(gamma_value, contrast_value):
     return True
 
 
-gamma = 3       # 1.0 = no change
-contrast = 1.05  # 1.0 = no change
+gamma = 4           # 1.0 = no change
+contrast = 1.05     # 1.0 = no change
 if not test_gamma_contrast_set(gamma, contrast):
     print("Gamma and contrast adjustment test failed.")
 
@@ -60,7 +60,7 @@ zoom_level = 1.0
 set_zoom_level(zoom_level, 0, 0) 
 print('Zoom\'s a-go.')
 press_start_time = None
-pause = 0.08
+pause = 0
 
 while True:
     if keyboard.is_pressed('shift'): 
@@ -68,7 +68,7 @@ while True:
             press_start_time = time.time()
 
         if time.time() - press_start_time >= pause:
-            zoom_level = 3
+            zoom_level = 4
             x = int(960*((16-(16/zoom_level))/16))
             y = int((x/16)*9)
             set_zoom_level(zoom_level, x, y)
