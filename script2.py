@@ -31,36 +31,34 @@ def test_gamma_contrast_set(gamma_value, contrast_value):
     print(f"Gamma successfully set to {gamma_value}, Contrast successfully set to {contrast_value}.")
     return True
 
-
-gamma = 4           # 1.0 = no change
-contrast = 1.05     # 1.0 = no change
-if not test_gamma_contrast_set(gamma, contrast):
-    print("Gamma and contrast adjustment test failed.")
-
-
-
-
-
-print('Launching zoom...')
-magnification = ctypes.WinDLL('Magnification.dll')
-magnification.MagInitialize.restype = wintypes.BOOL
-magnification.MagSetFullscreenTransform.argtypes = [wintypes.FLOAT, wintypes.INT, wintypes.INT]
-magnification.MagSetFullscreenTransform.restype = wintypes.BOOL
-
-def initialize_magnifier():
+def initialize_magnifier(magnification):
     if not magnification.MagInitialize():
         raise RuntimeError("Failed to initialize the magnifier.")
 
-def set_zoom_level(zoom_level, x, y):
+def set_zoom_level(zoom_level, x, y, magnification):
     if not magnification.MagSetFullscreenTransform(zoom_level, x, y):
         raise RuntimeError("Failed to set the zoom level.")
 
-initialize_magnifier()
-zoom_level = 1.0 
-set_zoom_level(zoom_level, 0, 0) 
-print('Zoom\'s a-go.')
-press_start_time = None
-pause = 0
+def zoom_init(zoom_level):
+    print('Launching zoom...')
+    magnification = ctypes.WinDLL('Magnification.dll')
+    magnification.MagInitialize.restype = wintypes.BOOL
+    magnification.MagSetFullscreenTransform.argtypes = [wintypes.FLOAT, wintypes.INT, wintypes.INT]
+    magnification.MagSetFullscreenTransform.restype = wintypes.BOOL
+
+    initialize_magnifier(magnification)
+    set_zoom_level(zoom_level, 0, 0, magnification) 
+    print('Zoom\'s a-go.')
+    press_start_time = None
+    pause = 0
+    return press_start_time, pause, magnification
+
+zoom_level = 1.0
+gamma = 4           # 1.0 = no change
+contrast = 1.05     # 1.0 = no change
+press_start_time, pause, magnification = zoom_init(zoom_level)
+if not test_gamma_contrast_set(gamma, contrast):
+    print("Gamma and contrast adjustment test failed.")
 
 while True:
     if keyboard.is_pressed('shift'): 
@@ -71,10 +69,10 @@ while True:
             zoom_level = 4
             x = int(960*((16-(16/zoom_level))/16))
             y = int((x/16)*9)
-            set_zoom_level(zoom_level, x, y)
+            set_zoom_level(zoom_level, x, y, magnification)
 
     else:
         press_start_time = None
         if zoom_level != 1.0:  
             zoom_level = 1.0  
-            set_zoom_level(zoom_level, 0, 0)
+            set_zoom_level(zoom_level, 0, 0, magnification)
