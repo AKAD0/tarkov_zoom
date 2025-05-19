@@ -96,8 +96,8 @@ async def main():
     zoom_level = 4
     gamma = 4           # 1.0 = no change
     contrast = 1.05     # 1.0 = no change
-    flash_gamma = 2     # 1.0 = no change
-    flash_contrast = 1.00  # 1.0 = no change
+    flash_gamma = 1     # 1.0 = no change
+    flash_contrast = 0.7  # 1.0 = no change
 
     press_start_time, pause, magnification = zoom_init(zoom_level)
     test_gamma_contrast_set(gamma, contrast)
