@@ -60,11 +60,16 @@ def set_mouse_sensitivity(sensitivity: int):
 
 
 
-
+# My default mouse seetings:
+# Razer synapse - 800dpi
+# Windows cursor speed - 20
+# Tarkov general - 0.250
+# Tarkov aiming - 0.200
 zoom_const = 4          # 1.0 = no zoom
 gamma = 4               # 1.0 = no gamma alteration
 contrast = 1.05         # 1.0 = no contrast alteration
-zoom_sensivity = 5      # Windows cursor sensivity (1 to 20)
+#//Default 20 because it DOESN'T WORK FOR TARKOV WEAPON SENSIVITY
+zoom_sensivity = 20     # Windows cursor sensivity (1 to 20) 
 
 
 
