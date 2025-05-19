@@ -65,15 +65,13 @@ async def handle_zoom(zoom_level, magnification, pause, press_start_time):
                 press_start_time = time.time()
 
             if time.time() - press_start_time >= pause:
-                zoom_level = 4
                 x = int(960*((16-(16/zoom_level))/16))
                 y = int((x/16)*9)
                 set_zoom_level(zoom_level, x, y, magnification)
         else:
             press_start_time = None
             if zoom_level != 1.0:  
-                zoom_level = 1.0  
-                set_zoom_level(zoom_level, 0, 0, magnification)
+                set_zoom_level(1, 0, 0, magnification)
 
         await asyncio.sleep(0.01)  # Prevent high CPU usage
 
@@ -95,7 +93,7 @@ async def handle_flash(gamma, contrast, flash_gamma, flash_contrast):
 
 
 async def main():
-    zoom_level = 1.0
+    zoom_level = 4
     gamma = 4           # 1.0 = no change
     contrast = 1.05     # 1.0 = no change
     flash_gamma = 2     # 1.0 = no change
