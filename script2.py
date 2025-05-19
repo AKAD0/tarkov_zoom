@@ -3,7 +3,6 @@ from ctypes import wintypes
 import keyboard
 import time
 
-
 def test_gamma_contrast_set(gamma_value, contrast_value):
     gdi32 = ctypes.windll.gdi32
     user32 = ctypes.windll.user32
@@ -40,7 +39,6 @@ def set_zoom_level(zoom_level, x, y, magnification):
         raise RuntimeError("Failed to set the zoom level.")
 
 def zoom_init(zoom_level):
-    print('Launching zoom...')
     magnification = ctypes.WinDLL('Magnification.dll')
     magnification.MagInitialize.restype = wintypes.BOOL
     magnification.MagSetFullscreenTransform.argtypes = [wintypes.FLOAT, wintypes.INT, wintypes.INT]
@@ -48,30 +46,45 @@ def zoom_init(zoom_level):
 
     initialize_magnifier(magnification)
     set_zoom_level(zoom_level, 0, 0, magnification) 
-    print('Zoom\'s a-go.')
+    print('Zoom\'s activated.')
     press_start_time = None
     pause = 0
     return press_start_time, pause, magnification
 
-zoom_level = 1.0
-gamma = 4           # 1.0 = no change
-contrast = 1.05     # 1.0 = no change
-press_start_time, pause, magnification = zoom_init(zoom_level)
-if not test_gamma_contrast_set(gamma, contrast):
-    print("Gamma and contrast adjustment test failed.")
+def set_mouse_sensitivity(sensitivity: int):
+    user32 = ctypes.windll.user32
+    SPI_SETMOUSESPEED = 113
+    user32.SystemParametersInfoA(SPI_SETMOUSESPEED, 0, ctypes.c_int(sensitivity), 0)
 
+
+
+
+
+
+zoom_const = 4          # 1.0 = no zoom
+gamma = 4               # 1.0 = no gamma alteration
+contrast = 1.05         # 1.0 = no contrast alteration
+zoom_sensivity = 5      # Windows cursor sensivity (1 to 20)
+
+
+
+zoom_level = zoom_const
+press_start_time, pause, magnification = zoom_init(zoom_level)
+test_gamma_contrast_set(gamma, contrast)
 while True:
     if keyboard.is_pressed('shift'): 
+        set_mouse_sensitivity(zoom_sensivity)
         if press_start_time is None:
             press_start_time = time.time()
 
         if time.time() - press_start_time >= pause:
-            zoom_level = 4
+            zoom_level = zoom_const
             x = int(960*((16-(16/zoom_level))/16))
             y = int((x/16)*9)
             set_zoom_level(zoom_level, x, y, magnification)
 
     else:
+        set_mouse_sensitivity(20)
         press_start_time = None
         if zoom_level != 1.0:  
             zoom_level = 1.0  

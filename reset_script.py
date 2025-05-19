@@ -33,8 +33,21 @@ def test_gamma_contrast_set(gamma_value, contrast_value):
     print(f"Gamma successfully set to {gamma_value}, Contrast successfully set to {contrast_value}.")
     return True
 
+def set_mouse_sensitivity(sensitivity: int):
+    user32 = ctypes.windll.user32
+    # Retrieve the current mouse settings
+    SPI_SETMOUSESPEED = 113
+    # Set the new mouse speed
+    success = user32.SystemParametersInfoA(SPI_SETMOUSESPEED, 0, ctypes.c_int(sensitivity), 0)
+    if success:
+        print(f"Sensivity: {sensitivity}.")
+    else:
+        print("Failed to set mouse sensitivity.")
+
 # Example usage:
 gamma = 1  # Typical gamma value
 contrast = 1  # Slight contrast increase (1.0 means no change, values > 1 increase contrast)
+desired_sensitivity = 20 # Windows cursor sensivity (1 to 20)
+set_mouse_sensitivity(desired_sensitivity)
 if not test_gamma_contrast_set(gamma, contrast):
     print("Gamma and contrast adjustment test failed.")
