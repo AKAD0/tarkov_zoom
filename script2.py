@@ -68,20 +68,20 @@ def zoom_init(zoom_level):
 
 async def handle_zoom_smooth(zoom_level, magnification, pause, press_start_time, zoom_speed):
     current_zoom = 1.0
-    speed = zoom_speed  # how fast zoom interpolates; smaller = smoother/slower
 
     while True:
         target_zoom = 1.0
         if right_mouse_pressed():
             target_zoom = zoom_level
+            speed = zoom_speed
             if press_start_time is None:
                 press_start_time = time.time()
         else:
+            speed = zoom_speed*8
             press_start_time = None
 
         # Smooth interpolation
         current_zoom += (target_zoom - current_zoom) * speed
-
         x = int(960*((16-(16/current_zoom))/16))
         y = int((x/16)*9)
         set_zoom_level(current_zoom, x, y, magnification)
@@ -111,7 +111,7 @@ async def main():
     contrast = 1.05     # 1.0 = no change
     flash_gamma = 1     # 1.0 = no change
     flash_contrast = 1  # 1.0 = no change
-    zoom_speed = 0.5
+    zoom_speed = 0.1
     #flash_gamma = 0.85     # 1.0 = no change
     #flash_contrast = 1  # 1.0 = no change
 
