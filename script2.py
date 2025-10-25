@@ -1,8 +1,17 @@
 import ctypes
 from ctypes import wintypes
+from ctypes import windll
 import keyboard
 import time
 import asyncio
+
+
+def right_mouse_pressed():
+    return windll.user32.GetAsyncKeyState(0x02) & 0x8000 != 0
+
+def f4_pressed():
+    return windll.user32.GetAsyncKeyState(0x73) & 0x8000 != 0  # F4 key
+
 
 
 def test_gamma_contrast_set(gamma_value, contrast_value):
@@ -57,10 +66,10 @@ def zoom_init(zoom_level):
 
 
 
-
 async def handle_zoom(zoom_level, magnification, pause, press_start_time):
     while True:
-        if keyboard.is_pressed('shift'): 
+        # if keyboard.is_pressed('shift'): 
+        if right_mouse_pressed():
             if press_start_time is None:
                 press_start_time = time.time()
 
@@ -73,22 +82,22 @@ async def handle_zoom(zoom_level, magnification, pause, press_start_time):
             if zoom_level != 1.0:  
                 set_zoom_level(1, 0, 0, magnification)
 
-        await asyncio.sleep(0.01)  # Prevent high CPU usage
+        await asyncio.sleep(0.001)  # Prevent high CPU usage
 
 
 async def handle_flash(gamma, contrast, flash_gamma, flash_contrast):
     flash=False
     while True:
-        if keyboard.is_pressed('v') and flash==False:
+        if f4_pressed() and flash==False:
             test_gamma_contrast_set(flash_gamma, flash_contrast)
             flash=True
             time.sleep(0.25)
-        elif keyboard.is_pressed('v') and flash==True:
+        elif f4_pressed() and flash==True:
             test_gamma_contrast_set(gamma, contrast)
             flash=False
             time.sleep(0.25)
 
-        await asyncio.sleep(0.01)  # Prevent high CPU usage
+        await asyncio.sleep(0.001)  # Prevent high CPU usage
 
 
 
@@ -96,8 +105,10 @@ async def main():
     zoom_level = 4
     gamma = 4           # 1.0 = no change
     contrast = 1.05     # 1.0 = no change
-    flash_gamma = 0.5     # 1.0 = no change
+    flash_gamma = 1     # 1.0 = no change
     flash_contrast = 1  # 1.0 = no change
+    #flash_gamma = 0.85     # 1.0 = no change
+    #flash_contrast = 1  # 1.0 = no change
 
     press_start_time, pause, magnification = zoom_init(zoom_level)
     test_gamma_contrast_set(gamma, contrast)
