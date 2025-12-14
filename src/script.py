@@ -72,13 +72,18 @@ def zoom_init(zoom_level):
 
 
 
-async def handle_zoom_smooth(zoom_level, magnification, pause, press_start_time, zoom_speed):
+async def handle_zoom(zoom_level_ads, zoom_level_freelook, magnification, pause, press_start_time, zoom_speed):
     current_zoom = 1.0
 
     while True:
         target_zoom = 1.0
-        if _right_mouse_pressed() or _X_pressed():
-            target_zoom = zoom_level
+        if _right_mouse_pressed():
+            target_zoom = zoom_level_ads
+            speed = zoom_speed
+            if press_start_time is None:
+                press_start_time = time.time()
+        elif _X_pressed():
+            target_zoom = zoom_level_freelook
             speed = zoom_speed
             if press_start_time is None:
                 press_start_time = time.time()
@@ -95,7 +100,7 @@ async def handle_zoom_smooth(zoom_level, magnification, pause, press_start_time,
         await asyncio.sleep(0.01)  # 10 ms, smoother than 1 ms
 
 
-async def handle_flash(gamma, contrast, flash_gamma, flash_contrast):
+async def handle_gamma(gamma, contrast, flash_gamma, flash_contrast):
     flash=False
     while True:
         if _f4_pressed() and flash==False:
@@ -123,21 +128,20 @@ async def reset():
 
 
 async def main():
-    zoom_level = 1.5
+    zoom_level_ads = 1.5
+    zoom_level_freelook = 4
     gamma = 3.5          # 1.0 = no change
     contrast = 1.1       # 1.0 = no change
     flash_gamma = 1.5    # 1.0 = no change
     flash_contrast = 1   # 1.0 = no change
     zoom_speed = 0.1
-    def_gamma = 1        # 1.0 = no change
-    def_contrast = 1     # 1.0 = no change
 
-    press_start_time, pause, magnification = zoom_init(zoom_level)
+    press_start_time, pause, magnification = zoom_init(zoom_level_ads)
     test_gamma_contrast_set(gamma, contrast)
 
     await asyncio.gather(
-        handle_zoom_smooth(zoom_level, magnification, pause, press_start_time, zoom_speed),
-        handle_flash(gamma, contrast, flash_gamma, flash_contrast),
+        handle_zoom(zoom_level_ads, zoom_level_freelook, magnification, pause, press_start_time, zoom_speed),
+        handle_gamma(gamma, contrast, flash_gamma, flash_contrast),
         reset()
     )
 
