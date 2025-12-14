@@ -6,11 +6,17 @@ import time
 import asyncio
 
 
-def right_mouse_pressed():
+def _right_mouse_pressed():
     return windll.user32.GetAsyncKeyState(0x02) & 0x8000 != 0
 
-def f4_pressed():
+def _X_pressed():
+    return windll.user32.GetAsyncKeyState(0x58) & 0x8000 != 0
+
+def _f4_pressed():
     return windll.user32.GetAsyncKeyState(0x73) & 0x8000 != 0  # F4 key
+
+def _f5_pressed():
+    return windll.user32.GetAsyncKeyState(0x74) & 0x8000 != 0  # F4 key
 
 
 
@@ -71,7 +77,7 @@ async def handle_zoom_smooth(zoom_level, magnification, pause, press_start_time,
 
     while True:
         target_zoom = 1.0
-        if right_mouse_pressed():
+        if _right_mouse_pressed() or _X_pressed():
             target_zoom = zoom_level
             speed = zoom_speed
             if press_start_time is None:
@@ -92,11 +98,11 @@ async def handle_zoom_smooth(zoom_level, magnification, pause, press_start_time,
 async def handle_flash(gamma, contrast, flash_gamma, flash_contrast):
     flash=False
     while True:
-        if f4_pressed() and flash==False:
+        if _f4_pressed() and flash==False:
             test_gamma_contrast_set(flash_gamma, flash_contrast)
             flash=True
             time.sleep(0.25)
-        elif f4_pressed() and flash==True:
+        elif _f4_pressed() and flash==True:
             test_gamma_contrast_set(gamma, contrast)
             flash=False
             time.sleep(0.25)
@@ -104,23 +110,35 @@ async def handle_flash(gamma, contrast, flash_gamma, flash_contrast):
         await asyncio.sleep(0.001)  # Prevent high CPU usage
 
 
+async def reset():
+    def_gamma = 1        # 1.0 = no change
+    def_contrast = 1     # 1.0 = no change
+    while True:
+        if _f5_pressed():
+            test_gamma_contrast_set(def_gamma, def_contrast)
+            time.sleep(0.25)
+
+        await asyncio.sleep(0.001)  # Prevent high CPU usage
+
+
 
 async def main():
-    zoom_level = 4
-    gamma = 4           # 1.0 = no change
-    contrast = 1.05     # 1.0 = no change
-    flash_gamma = 1     # 1.0 = no change
-    flash_contrast = 1  # 1.0 = no change
+    zoom_level = 1.5
+    gamma = 3.5          # 1.0 = no change
+    contrast = 1.1       # 1.0 = no change
+    flash_gamma = 1.5    # 1.0 = no change
+    flash_contrast = 1   # 1.0 = no change
     zoom_speed = 0.1
-    #flash_gamma = 0.85     # 1.0 = no change
-    #flash_contrast = 1  # 1.0 = no change
+    def_gamma = 1        # 1.0 = no change
+    def_contrast = 1     # 1.0 = no change
 
     press_start_time, pause, magnification = zoom_init(zoom_level)
     test_gamma_contrast_set(gamma, contrast)
 
     await asyncio.gather(
         handle_zoom_smooth(zoom_level, magnification, pause, press_start_time, zoom_speed),
-        handle_flash(gamma, contrast, flash_gamma, flash_contrast)
+        handle_flash(gamma, contrast, flash_gamma, flash_contrast),
+        reset()
     )
 
 

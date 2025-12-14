@@ -5,5 +5,5 @@ cd /d %DIR%
 
 
 call .\venv\Scripts\activate.bat
-"python.exe" ".\script.py"
+"python.exe" ".\src\script.py"
 pause

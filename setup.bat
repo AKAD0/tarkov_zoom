@@ -6,7 +6,7 @@ cd /d %DIR%
 REM install libs
 "python.exe" -m venv venv
 call .\venv\Scripts\activate.bat
-pip install keyboard mouse monitorcontrol numpy
+pip install keyboard mouse monitorcontrol numpy pywin32
 
 REM add .gitignore file
 cd /d %DIR%
