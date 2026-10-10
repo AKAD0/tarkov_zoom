@@ -20,9 +20,36 @@ def _f5_pressed():
 
 
 
+class DISPLAY_DEVICEW(ctypes.Structure):
+    _fields_ = [
+        ("cb", wintypes.DWORD),
+        ("DeviceName", wintypes.WCHAR * 32),
+        ("DeviceString", wintypes.WCHAR * 128),
+        ("StateFlags", wintypes.DWORD),
+        ("DeviceID", wintypes.WCHAR * 128),
+        ("DeviceKey", wintypes.WCHAR * 128),
+    ]
+
+def _primary_display_name():
+    # GetDC(0) spans the whole virtual desktop, and SetDeviceGammaRamp fails on it
+    # when more than one monitor is attached, so target the primary display directly.
+    user32 = ctypes.windll.user32
+    device = DISPLAY_DEVICEW()
+    device.cb = ctypes.sizeof(DISPLAY_DEVICEW)
+    i = 0
+    while user32.EnumDisplayDevicesW(None, i, ctypes.byref(device), 0):
+        if device.StateFlags & 0x4:  # DISPLAY_DEVICE_PRIMARY_DEVICE
+            return device.DeviceName
+        i += 1
+    return None
+
 def test_gamma_contrast_set(gamma_value, contrast_value):
     gdi32 = ctypes.windll.gdi32
-    user32 = ctypes.windll.user32
+    gdi32.CreateDCW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR, wintypes.LPCWSTR, ctypes.c_void_p]
+    gdi32.CreateDCW.restype = wintypes.HDC
+    gdi32.SetDeviceGammaRamp.argtypes = [wintypes.HDC, ctypes.c_void_p]
+    gdi32.SetDeviceGammaRamp.restype = wintypes.BOOL
+    gdi32.DeleteDC.argtypes = [wintypes.HDC]
     ramp = (ctypes.c_ushort * 256 * 3)()
     
     # Adjust contrast
@@ -33,13 +60,13 @@ def test_gamma_contrast_set(gamma_value, contrast_value):
         value = int((contrast_adjusted / 255.0) ** (1.0 / gamma_value) * 65535)
         ramp[0][i] = ramp[1][i] = ramp[2][i] = min(value, 65535)
     
-    hdc = user32.GetDC(0)
-    if hdc == 0:
+    hdc = gdi32.CreateDCW(_primary_display_name(), None, None, None)
+    if not hdc:
         print("Failed to get device context.")
         return False
     
     success = gdi32.SetDeviceGammaRamp(hdc, ctypes.byref(ramp))
-    user32.ReleaseDC(0, hdc)
+    gdi32.DeleteDC(hdc)
     
     if not success:
         print("SetDeviceGammaRamp failed.")
